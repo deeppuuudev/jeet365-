@@ -1,129 +1,123 @@
-<!DOCTYPE html><html lang="en">
+<!-- game.html - Jeet365 Color and Number Game -->
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>★ Jeet365 Color Game</title>
+  <title>Jeet365 Color Game</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
     body {
-      background: #ffe5b4;
+      background: #fff;
       font-family: Arial, sans-serif;
-      text-align: center;
       padding: 20px;
+      text-align: center;
     }
     h1 {
-      color: #000;
+      font-size: 2rem;
+      color: #222;
+      margin-bottom: 10px;
+    }
+    .timer {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
     }
     .color-options, .number-grid {
       display: flex;
       justify-content: center;
-      gap: 10px;
-      margin: 20px 0;
       flex-wrap: wrap;
+      gap: 15px;
+      margin: 15px 0;
     }
-    .color-btn {
-      width: 80px;
-      height: 50px;
+    .color-btn, .number-btn {
+      width: 60px;
+      height: 60px;
       border-radius: 10px;
       cursor: pointer;
-      transition: transform 0.3s ease;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .color-btn:hover {
-      transform: scale(1.1);
+    .red { background: red; color: #fff; }
+    .green { background: green; color: #fff; }
+    .violet { background: violet; color: #000; }
+    .selected { border-color: #000; box-shadow: 0 0 5px #000; }
+    .bet-section {
+      margin-top: 20px;
     }
-    .red { background: red; }
-    .green { background: green; }
-    .violet { background: purple; }.number-btn {
-  width: 50px;
-  height: 50px;
-  background: #eee;
-  border: 2px solid #ccc;
-  font-weight: bold;
-  font-size: 18px;
-  line-height: 50px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: transform 0.3s ease, background-color 0.3s;
-}
-.number-btn:hover {
-  transform: scale(1.1);
-  background-color: #ddd;
-}
-
-.bet-section input, .bet-section button {
-  margin: 10px;
-  padding: 10px;
-  font-size: 16px;
-}
-
-.popup {
-  display: none;
-  position: fixed;
-  top: 30%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  padding: 20px;
-  border: 2px solid #000;
-  z-index: 1000;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  animation: fadeIn 0.5s ease;
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.results-table {
-  width: 100%;
-  max-width: 600px;
-  margin: 30px auto;
-  border-collapse: collapse;
-}
-.results-table th, .results-table td {
-  border: 1px solid #000;
-  padding: 10px;
-}
-
-#userInfo {
-  margin-bottom: 10px;
-  font-size: 16px;
-  font-weight: bold;
-}
-
+    .bet-section input {
+      padding: 10px;
+      width: 150px;
+      margin-bottom: 10px;
+    }
+    .bet-section button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      background: #000;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+    }
+    #resultPopup {
+      display: none;
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .recent-results-table {
+      width: 100%;
+      max-width: 600px;
+      margin: 30px auto;
+      border-collapse: collapse;
+    }
+    .recent-results-table th, .recent-results-table td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <h1>🎯 Jeet365 Color Game</h1>
-  <div id="userInfo">User: Loading... | Coins: <span id="coins">0</span></div>
-  <h3>Next round in <span id="timer">30</span> sec</h3>  <div class="color-options">
-    <div class="color-btn red" onclick="selectColor('red')"></div>
-    <div class="color-btn green" onclick="selectColor('green')"></div>
-    <div class="color-btn violet" onclick="selectColor('violet')"></div>
-  </div>  <div class="number-grid">
-    <div class="number-btn" onclick="selectNumber(1)">1</div>
-    <div class="number-btn" onclick="selectNumber(2)">2</div>
-    <div class="number-btn" onclick="selectNumber(3)">3</div>
-    <div class="number-btn" onclick="selectNumber(4)">4</div>
-    <div class="number-btn" onclick="selectNumber(5)">5</div>
-    <div class="number-btn" onclick="selectNumber(6)">6</div>
-    <div class="number-btn" onclick="selectNumber(7)">7</div>
-    <div class="number-btn" onclick="selectNumber(8)">8</div>
-    <div class="number-btn" onclick="selectNumber(9)">9</div>
-    <div class="number-btn" onclick="selectNumber(0)">0</div>
-  </div>  <div class="bet-section">
-    <input type="number" id="betAmount" placeholder="Enter Bet Amount (Min 10)" min="10" />
+  <h1>🎯 Jeet365 Color & Number Game</h1>
+  <div class="timer">Next round in <span id="timer">30</span> sec</div>
+
+  <div class="color-options">
+    <div class="color-btn red" onclick="selectColor('red')">Red</div>
+    <div class="color-btn green" onclick="selectColor('green')">Green</div>
+    <div class="color-btn violet" onclick="selectColor('violet')">Violet</div>
+  </div>
+
+  <div class="number-grid" id="numberGrid"></div>
+
+  <div class="bet-section">
+    <input type="number" id="betAmount" placeholder="Enter Bet Amount (min 10)" />
     <br />
     <button onclick="placeBet()">Place Bet</button>
-  </div>  <div id="popup" class="popup"></div>  <table class="results-table">
+  </div>
+
+  <div id="resultPopup"></div>
+
+  <table class="recent-results-table">
     <thead>
-      <tr>
-        <th>User</th>
-        <th>Number</th>
-        <th>Color</th>
-      </tr>
+      <tr><th>User ID</th><th>Color</th><th>Number</th></tr>
     </thead>
     <tbody id="recentResults"></tbody>
-  </table>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>  <script>
+  </table>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBo47HJZAcS8nCEyntKPAJLeJg_zUTo1nw",
       authDomain: "jeet365-e0749.firebaseapp.com",
@@ -139,99 +133,81 @@
 
     let selectedColor = null;
     let selectedNumber = null;
-    let userId = null;
-    let coins = 0;
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        userId = user.uid;
-        db.ref("users/" + userId).once("value").then(snapshot => {
-          const data = snapshot.val();
-          coins = data?.coins || 0;
-          document.getElementById("coins").innerText = coins;
-          document.getElementById("userInfo").innerText = User: ${user.email} | Coins: ${coins};
-        });
-      } else {
-        window.location.href = "login.html";
-      }
-    });
 
     function selectColor(color) {
       selectedColor = color;
+      document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('selected'));
+      document.querySelector(.${color}).classList.add('selected');
     }
+
     function selectNumber(num) {
       selectedNumber = num;
+      document.querySelectorAll('.number-btn').forEach(btn => btn.classList.remove('selected'));
+      document.getElementById(num-${num}).classList.add('selected');
     }
 
     function placeBet() {
       const amount = parseInt(document.getElementById('betAmount').value);
-      if (!selectedColor || selectedNumber === null || amount < 10) {
-        alert("Please select color, number, and valid amount");
+      if (!selectedColor || selectedNumber === null || isNaN(amount) || amount < 10) {
+        alert('Please select color, number and enter amount (min 10)');
         return;
       }
-      if (coins < amount) {
-        alert("Not enough coins");
-        return;
-      }
-      coins -= amount;
-      db.ref("users/" + userId).update({ coins });
-      document.getElementById("coins").innerText = coins;
-      runGame(amount);
+
+      const uid = auth.currentUser ? auth.currentUser.uid : 'guest-' + Math.floor(Math.random()*1000);
+      const betData = { uid, selectedColor, selectedNumber, amount, time: Date.now() };
+      db.ref('bets').push(betData);
+
+      showResultPopup(You placed ₹${amount} on ${selectedColor} & ${selectedNumber});
     }
 
-    function runGame(betAmount) {
-      const outcomeColor = Math.random() < 0.8 ? ['red', 'green', 'violet'][Math.floor(Math.random()*3)] : selectedColor;
-      const outcomeNumber = getNumberForColor(outcomeColor);
-      const popup = document.getElementById("popup");
-
-      let win = false;
-      let reward = 0;
-
-      if (selectedColor === outcomeColor && selectedNumber === outcomeNumber) {
-        reward = betAmount * 8;
-        win = true;
-      } else if (selectedColor === outcomeColor) {
-        reward = betAmount * 2;
-        win = true;
-      }
-
-      if (win) {
-        coins += reward;
-        db.ref("users/" + userId).update({ coins });
-        popup.innerText = You Win! +${reward} coins;
-      } else {
-        popup.innerText = You Lost!;
-      }
-      document.getElementById("coins").innerText = coins;
-      popup.style.display = "block";
-      setTimeout(() => popup.style.display = "none", 3000);
-
-      addToResultTable(user${Math.floor(Math.random() * 9999)}, outcomeNumber, outcomeColor);
-      selectedColor = null;
-      selectedNumber = null;
+    function showResultPopup(message) {
+      const popup = document.getElementById('resultPopup');
+      popup.innerText = message;
+      popup.style.display = 'block';
+      setTimeout(() => popup.style.display = 'none', 3000);
     }
 
-    function getNumberForColor(color) {
-      if (color === 'red') return [1, 2, 3, 4][Math.floor(Math.random() * 4)];
-      if (color === 'green') return [5, 6, 7, 8, 9][Math.floor(Math.random() * 5)];
-      if (color === 'violet') return 0;
+    function updateTimer() {
+      let t = 30;
+      setInterval(() => {
+        t--;
+        if (t < 0) t = 30;
+        document.getElementById('timer').innerText = t;
+      }, 1000);
     }
 
-    function addToResultTable(uid, number, color) {
-      const tbody = document.getElementById("recentResults");
-      const row = document.createElement("tr");
-      row.innerHTML = <td>${uid}</td><td>${number}</td><td style="color:${color}">${color}</td>;
-      tbody.prepend(row);
-      if (tbody.rows.length > 20) tbody.deleteRow(20);
-    }
-
-    let timer = 30;
-    setInterval(() => {
-      timer--;
-      document.getElementById("timer").innerText = timer;
-      if (timer === 0) {
-        timer = 30;
+    function generateFakeResults() {
+      const colors = ['red', 'green', 'violet'];
+      const table = document.getElementById('recentResults');
+      table.innerHTML = '';
+      for (let i = 0; i < 20; i++) {
+        const tr = document.createElement('tr');
+        const uid = 'user_' + Math.floor(Math.random() * 10000);
+        const color = colors[Math.floor(Math.random() * 3)];
+        const number = Math.floor(Math.random() * 10);
+        tr.innerHTML = <td>${uid}</td><td>${color}</td><td>${number}</td>;
+        table.appendChild(tr);
       }
-    }, 1000);
-  </script></body>
+    }
+
+    function generateNumberGrid() {
+      const container = document.getElementById('numberGrid');
+      container.innerHTML = '';
+      for (let i = 0; i <= 9; i++) {
+        const btn = document.createElement('div');
+        btn.className = 'number-btn';
+        btn.id = num-${i};
+        btn.innerText = i;
+        btn.onclick = () => selectNumber(i);
+        container.appendChild(btn);
+      }
+    }
+
+    window.onload = () => {
+      generateNumberGrid();
+      updateTimer();
+      generateFakeResults();
+    }
+  </script>
+</body>
 </html>
