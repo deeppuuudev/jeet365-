@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Withdraw Coins - Jeet365</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      color: #ff3c00;
+      text-align: center;
+    }
+    form {
+      max-width: 400px;
+      margin: auto;
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px red;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      background-color: #ff3c00;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .note {
+      text-align: center;
+      font-size: 14px;
+      color: #ccc;
+    }
+    #coins {
+      text-align: center;
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: yellow;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Withdraw Coins</h2>
+
+  <div id="coins">Loading your balance...</div>
+
+  <form id="withdrawForm">
+    <input type="text" id="upi" placeholder="Enter Your UPI ID" required>
+    <input type="number" id="amount" placeholder="Amount to Withdraw ₹" min="10" required>
+    <button type="submit">Request Withdraw</button>
+  </form>
+
+  <p class="note">⚠ Minimum ₹10 withdraw required. Admin will manually send to your UPI.</p>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    let currentUser;
+    let userCoins = 0;
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (!user) return location.href = "login.html";
+      currentUser = user;
+
+      // Fetch coins
+      firebase.database().ref("users/" + user.uid + "/coins").on("value", function(snapshot) {
+        userCoins = snapshot.val() || 0;
+        document.getElementById("coins").innerText = Your Balance: ₹${userCoins};
+      });
+    });
+
+    document.getElementById("withdrawForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const upi = document.getElementById("upi").value.trim();
+      const amount = parseInt(document.getElementById("amount").value.trim());
+
+      if (!upi || isNaN(amount) || amount < 10) {
+        alert("Enter valid UPI ID and minimum ₹10 amount.");
+        return;
+      }
+
+      if (amount > userCoins) {
+        alert("Insufficient balance.");
+        return;
+      }
+
+      // Deduct coins and send request
+      const updates = {};
+      updates["users/" + currentUser.uid + "/coins"] = userCoins - amount;
+
+      const newRequest = {
+        uid: currentUser.uid,
+        upi: upi,
+        amount: amount,
+        type: "withdraw",
+        status: "pending",
+        timestamp: Date.now()
+      };
+
+      const requestKey = firebase.database().ref("requests").push().key;
+      updates["requests/" + requestKey] = newRequest;
+
+      firebase.database().ref().update(updates).then(() => {
+        alert("Withdraw request submitted! Admin will send amount to your UPI.");
+        document.getElementById("withdrawForm").reset();
+      });
+    });
+  </script>
+
+</body>
+</html>
