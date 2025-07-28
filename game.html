@@ -2,195 +2,162 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎯 Jeet365 Color & Number Game</title>
+  <title>Jeet365 Color Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #ffffff;
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+    body {
+      background: white;
       padding: 20px;
-      text-align: center;
     }
     h1 {
-      font-size: 24px;
+      text-align: center;
       margin-bottom: 10px;
     }
     .timer {
+      text-align: center;
       font-size: 20px;
-      font-weight: bold;
-      color: #333;
       margin-bottom: 20px;
+      color: #333;
     }
-    .color-options, .number-options {
+    .colors, .numbers {
       display: flex;
       justify-content: center;
       gap: 10px;
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
-    .color-btn, .number-btn {
+    .color-box, .number-box {
       width: 60px;
       height: 60px;
-      border-radius: 8px;
-      border: 2px solid #ccc;
       display: flex;
-      align-items: center;
       justify-content: center;
-      font-size: 18px;
+      align-items: center;
+      font-weight: bold;
+      color: white;
       cursor: pointer;
+      border-radius: 5px;
     }
-    .red { background-color: #f44336; color: white; }
-    .green { background-color: #4caf50; color: white; }
-    .violet { background-color: #9c27b0; color: white; }
-    .selected { border: 3px solid #000; }
+    .red { background: red; }
+    .green { background: green; }
+    .violet { background: violet; }
+    .number-box { background: #444; width: 50px; height: 50px; }
+    .selected { outline: 4px solid gold; }
     .bet-section {
-      margin: 20px 0;
+      text-align: center;
+      margin-bottom: 20px;
     }
     input {
       padding: 8px;
       font-size: 16px;
-      width: 150px;
+      margin-bottom: 10px;
     }
     button {
       padding: 10px 20px;
       font-size: 16px;
-      margin-top: 10px;
+      background-color: black;
+      color: white;
+      border: none;
       cursor: pointer;
+    }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .history-table th, .history-table td {
+      padding: 8px;
+      border: 1px solid #ccc;
+      text-align: center;
     }
     .popup {
       display: none;
       position: fixed;
-      top: 50%;
+      top: 30%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: #fff;
+      background: white;
       padding: 20px;
-      border: 2px solid #000;
-      z-index: 999;
-    }
-    .recent-table {
-      margin-top: 30px;
-      width: 100%;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-      border-collapse: collapse;
-    }
-    .recent-table th, .recent-table td {
-      border: 1px solid #ccc;
-      padding: 8px;
-    }
-    .recent-table th {
-      background-color: #eee;
+      border: 2px solid #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+      font-size: 18px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>🎯 Jeet365 Color & Number Game</h1>
-  <div class="timer" id="timer">Next round in 30 sec</div>  <div class="color-options">
-    <div class="color-btn red" onclick="selectColor('red')">Red</div>
-    <div class="color-btn green" onclick="selectColor('green')">Green</div>
-    <div class="color-btn violet" onclick="selectColor('violet')">Violet</div>
-  </div>  <div class="number-options" id="numberOptions"></div>  <div class="bet-section">
-    <input type="number" id="betAmount" placeholder="Bet amount (Min 10)" min="10" />
+  <h1>🎯 Jeet365 Color Game</h1>
+  <div class="timer">Next round in <span id="countdown">30</span> sec</div>  <div class="colors">
+    <div class="color-box red" onclick="selectColor('red')">Red</div>
+    <div class="color-box green" onclick="selectColor('green')">Green</div>
+    <div class="color-box violet" onclick="selectColor('violet')">Violet</div>
+  </div>  <div class="numbers">
+    <!-- 5x2 grid layout -->
+    <div class="number-box" onclick="selectNumber(1)">1</div>
+    <div class="number-box" onclick="selectNumber(2)">2</div>
+    <div class="number-box" onclick="selectNumber(3)">3</div>
+    <div class="number-box" onclick="selectNumber(4)">4</div>
+    <div class="number-box" onclick="selectNumber(5)">5</div>
+    <div class="number-box" onclick="selectNumber(6)">6</div>
+    <div class="number-box" onclick="selectNumber(7)">7</div>
+    <div class="number-box" onclick="selectNumber(8)">8</div>
+    <div class="number-box" onclick="selectNumber(9)">9</div>
+    <div class="number-box" onclick="selectNumber(0)">0</div>
+  </div>  <div class="bet-section">
+    <input type="number" id="betAmount" placeholder="Enter Bet Amount" min="10" />
     <br />
     <button onclick="placeBet()">Place Bet</button>
-  </div>  <div class="popup" id="resultPopup"></div>  <h3>Recent Results</h3>
-  <table class="recent-table" id="recentTable">
+  </div>  <table class="history-table">
     <thead>
-      <tr><th>User</th><th>Number</th><th>Color</th></tr>
+      <tr><th>User</th><th>Color</th><th>Number</th></tr>
     </thead>
-    <tbody></tbody>
-  </table>  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBo47HJZAcS8nCEyntKPAJLeJg_zUTo1nw",
-      authDomain: "jeet365-e0749.firebaseapp.com",
-      databaseURL: "https://jeet365-e0749-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "jeet365-e0749",
-      storageBucket: "jeet365-e0749.appspot.com",
-      messagingSenderId: "856388622116",
-      appId: "1:856388622116:web:f2313da855969554e405b1"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-
+    <tbody id="historyBody"></tbody>
+  </table>  <div class="popup" id="resultPopup"></div>  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>  <script src="firebase-config.js"></script>  <script>
     let selectedColor = null;
     let selectedNumber = null;
+    let timer = 30;
 
     function selectColor(color) {
       selectedColor = color;
-      document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('selected'));
-      event.target.classList.add('selected');
+      document.querySelectorAll('.color-box').forEach(el => el.classList.remove('selected'));
+      document.querySelector(.${color}).classList.add('selected');
     }
 
     function selectNumber(num) {
       selectedNumber = num;
-      document.querySelectorAll('.number-btn').forEach(btn => btn.classList.remove('selected'));
+      document.querySelectorAll('.number-box').forEach(el => el.classList.remove('selected'));
       event.target.classList.add('selected');
     }
 
-    function generateNumberOptions() {
-      const container = document.getElementById("numberOptions");
-      container.innerHTML = "";
-      const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
-      numbers.forEach(num => {
-        const btn = document.createElement("div");
-        btn.className = "number-btn";
-        btn.textContent = ${num}x;
-        btn.onclick = () => selectNumber(num);
-        if ([1,2,3,4].includes(num)) btn.style.backgroundColor = '#f44336'; // red
-        else if ([5,6,7,8,9].includes(num)) btn.style.backgroundColor = '#4caf50'; // green
-        else btn.style.backgroundColor = '#9c27b0'; // violet (0)
-        btn.style.color = '#fff';
-        container.appendChild(btn);
-      });
-    }
-
-    generateNumberOptions();
-
     function placeBet() {
-      const amount = parseInt(document.getElementById("betAmount").value);
-      if (!selectedColor || selectedNumber === null || amount < 10) {
-        alert("Select color, number and minimum 10 coins");
+      const bet = parseInt(document.getElementById('betAmount').value);
+      if (!selectedColor || selectedNumber === null || isNaN(bet) || bet < 10) {
+        alert("Please select a color, number and enter minimum bet of 10.");
         return;
       }
-      auth.onAuthStateChanged(user => {
-        if (user) {
-          const uid = user.uid;
-          const betData = {
-            color: selectedColor,
-            number: selectedNumber,
-            amount,
-            time: Date.now()
-          };
-          db.ref(games/${uid}).push(betData);
-        }
-      });
+      // Simulate 20% win
+      const win = Math.random() < 0.2;
+      const popup = document.getElementById("resultPopup");
+      popup.innerText = win ? You Won! +${bet * 2} Coins : "You Lost! Try Again.";
+      popup.style.display = 'block';
+      setTimeout(() => popup.style.display = 'none', 3000);
+
+      // Fake history
+      const uid = 'UID' + Math.floor(Math.random() * 9999);
+      const row = <tr><td>${uid}</td><td>${selectedColor}</td><td>${selectedNumber}</td></tr>;
+      document.getElementById("historyBody").innerHTML = row + document.getElementById("historyBody").innerHTML;
     }
 
-    function startTimer() {
-      let timer = 30;
-      setInterval(() => {
-        document.getElementById("timer").textContent = Next round in ${timer--} sec;
-        if (timer < 0) timer = 30;
-      }, 1000);
-    }
-
-    function loadRecentTable() {
-      const table = document.getElementById("recentTable").querySelector("tbody");
-      table.innerHTML = "";
-      for (let i = 0; i < 20; i++) {
-        const row = table.insertRow();
-        row.insertCell(0).innerText = user_${Math.floor(Math.random()*10000)};
-        const num = Math.floor(Math.random() * 10);
-        row.insertCell(1).innerText = num;
-        const color = ["red", "green", "violet"][Math.floor(Math.random()*3)];
-        row.insertCell(2).innerText = color;
-      }
-    }
-
-    startTimer();
-    loadRecentTable();
+    setInterval(() => {
+      timer--;
+      if (timer <= 0) timer = 30;
+      document.getElementById("countdown").innerText = timer;
+    }, 1000);
   </script></body>
 </html>
