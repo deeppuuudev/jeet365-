@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jeet365 - Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #000;
+      color: white;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: #111;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+    }
+
+    h2 {
+      color: goldenrod;
+      text-align: center;
+    }
+
+    p {
+      text-align: center;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    .balance {
+      font-size: 20px;
+      color: #0f0;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      padding: 14px;
+      border: none;
+      border-radius: 6px;
+      background-color: goldenrod;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background-color: orange;
+    }
+
+    .logout {
+      margin-top: 25px;
+      text-align: center;
+    }
+
+    .logout button {
+      background-color: red;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Welcome to Jeet365!</h2>
+    <p id="userEmail">Loading...</p>
+    <div class="balance">Coins: <span id="coinBalance">0</span></div>
+
+    <div class="btn-group">
+      <button class="btn" onclick="window.location.href='game.html'">🎮 Play Color Game</button>
+      <button class="btn" onclick="window.location.href='add.html'">➕ Add Coins</button>
+      <button class="btn" onclick="window.location.href='withdraw.html'">💸 Withdraw Coins</button>
+    </div>
+
+    <div class="logout">
+      <button onclick="logoutUser()">Logout</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBo47HJZAcS8nCEyntKPAJLeJg_zUTo1nw",
+      authDomain: "jeet365-e0749.firebaseapp.com",
+      databaseURL: "https://jeet365-e0749-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "jeet365-e0749",
+      storageBucket: "jeet365-e0749.firebasestorage.app",
+      messagingSenderId: "856388622116",
+      appId: "1:856388622116:web:f2313da855969554e405b1",
+      measurementId: "G-EH0F3Q96F5"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <!-- Dashboard Logic -->
+  <script>
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        document.getElementById("userEmail").innerText = "Logged in as: " + user.email;
+
+        // Get coin balance
+        firebase.database().ref("users/" + user.uid + "/coins").on("value", (snapshot) => {
+          const coins = snapshot.val();
+          document.getElementById("coinBalance").innerText = coins !== null ? coins : 0;
+        });
+
+      } else {
+        // Not logged in
+        window.location.href = "login.html";
+      }
+    });
+
+    function logoutUser() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
+  </script>
+
+</body>
+</html>
