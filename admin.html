@@ -6,39 +6,59 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #111;
+      background-color: #0f0f0f;
       color: #fff;
       padding: 20px;
     }
     h2 {
       color: #facc15;
+      font-size: 28px;
+      text-align: center;
+    }
+    #requestsList {
+      margin-top: 30px;
     }
     .request-card {
-      border: 1px solid #facc15;
+      border-left: 5px solid #facc15;
+      background: #1e1e1e;
       border-radius: 10px;
-      padding: 15px;
+      padding: 15px 20px;
       margin-bottom: 15px;
-      background-color: #1f1f1f;
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
+      transition: transform 0.2s ease;
+    }
+    .request-card:hover {
+      transform: scale(1.02);
+    }
+    .request-card p {
+      margin: 5px 0;
     }
     .btn {
-      padding: 8px 15px;
+      padding: 8px 16px;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
+      margin-right: 10px;
       cursor: pointer;
-      margin: 5px;
+      font-weight: 600;
       color: white;
+      transition: background 0.2s;
     }
-    .approve { background-color: green; }
-    .reject { background-color: red; }
+    .approve { background-color: #16a34a; }
+    .approve:hover { background-color: #15803d; }
+    .reject { background-color: #dc2626; }
+    .reject:hover { background-color: #b91c1c; }
   </style>
 </head>
 <body>
-  <h2>Admin Panel - Jeet365</h2>
+
+  <h2>Jeet365 Admin Panel</h2>
+
   <div id="adminPanel" style="display: none;">
-    <h3>Pending Requests:</h3>
+    <h3 style="color:#facc15; margin-top: 30px;">Pending Requests</h3>
     <div id="requestsList"></div>
   </div>
 
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
@@ -57,22 +77,20 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // ✅ Admin Email Only
+    // Admin email
     const adminEmail = "deepworkhome100@gmail.com";
 
-    // ✅ Check if Logged In + Is Admin
+    // Check Admin
     auth.onAuthStateChanged(user => {
       if (user) {
         if (user.email === adminEmail) {
           document.getElementById("adminPanel").style.display = "block";
           loadRequests();
         } else {
-          // ❌ Not Admin – Redirect to Dashboard
           alert("You are not admin!");
           window.location.href = "dashboard.html";
         }
       } else {
-        // ❌ Not Logged In – Redirect to Login
         window.location.href = "login.html";
       }
     });
@@ -84,21 +102,22 @@
         const list = document.getElementById("requestsList");
         list.innerHTML = "";
 
-        for (let key in requests) {
-          const req = requests[key];
+        const entries = Object.entries(requests || {}).reverse(); // latest on top
+
+        entries.forEach(([key, req]) => {
           if (req.status === "pending") {
             const card = document.createElement("div");
             card.className = "request-card";
             card.innerHTML = `
               <p><b>User ID:</b> ${req.uid}</p>
-              <p><b>Type:</b> ${req.type}</p>
-              <p><b>Amount:</b> ${req.amount}</p>
+              <p><b>Type:</b> ${req.type === "add" ? "🟢 Add Coins" : "🔴 Withdraw"}</p>
+              <p><b>Amount:</b> ₹${req.amount}</p>
               <button class="btn approve" onclick="approveRequest('${key}', '${req.uid}', ${req.amount}, '${req.type}')">Approve</button>
               <button class="btn reject" onclick="rejectRequest('${key}')">Reject</button>
             `;
             list.appendChild(card);
           }
-        }
+        });
       });
     }
 
@@ -106,7 +125,7 @@
       const userRef = db.ref("users/" + uid);
       userRef.once("value", snapshot => {
         const data = snapshot.val();
-        let newCoins = data.coins;
+        let newCoins = data?.coins || 0;
 
         if (type === "add") {
           newCoins += amount;
@@ -116,16 +135,17 @@
 
         userRef.update({ coins: newCoins });
         db.ref("requests/" + reqId).update({ status: "approved" });
-        alert("Approved!");
+        alert("Request Approved!");
         loadRequests();
       });
     }
 
     function rejectRequest(reqId) {
       db.ref("requests/" + reqId).update({ status: "rejected" });
-      alert("Rejected!");
+      alert("Request Rejected!");
       loadRequests();
     }
   </script>
+
 </body>
 </html>
