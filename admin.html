@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jeet365 Admin Panel</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #111;
+      color: #fff;
+      padding: 20px;
+    }
+    h2 {
+      color: #facc15;
+    }
+    .request-card {
+      border: 1px solid #facc15;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #1f1f1f;
+    }
+    .btn {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+      color: white;
+    }
+    .approve { background-color: green; }
+    .reject { background-color: red; }
+  </style>
+</head>
+<body>
+  <h2>Admin Panel - Jeet365</h2>
+  <div id="adminPanel" style="display: none;">
+    <h3>Pending Requests:</h3>
+    <div id="requestsList"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBo47HJZAcS8nCEyntKPAJLeJg_zUTo1nw",
+      authDomain: "jeet365-e0749.firebaseapp.com",
+      databaseURL: "https://jeet365-e0749-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "jeet365-e0749",
+      storageBucket: "jeet365-e0749.appspot.com",
+      messagingSenderId: "856388622116",
+      appId: "1:856388622116:web:f2313da855969554e405b1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // Admin Email
+    const adminEmail = "deepworkhome100@gmail.com";
+
+    auth.onAuthStateChanged(user => {
+      if (user && user.email === adminEmail) {
+        document.getElementById("adminPanel").style.display = "block";
+        loadRequests();
+      } else {
+        alert("You are not authorized!");
+        window.location.href = "dashboard.html";
+      }
+    });
+
+    function loadRequests() {
+      const ref = db.ref("requests");
+      ref.once("value", snapshot => {
+        const requests = snapshot.val();
+        const list = document.getElementById("requestsList");
+        list.innerHTML = "";
+
+        for (let key in requests) {
+          const req = requests[key];
+          if (req.status === "pending") {
+            const card = document.createElement("div");
+            card.className = "request-card";
+            card.innerHTML = `
+              <p><b>User ID:</b> ${req.uid}</p>
+              <p><b>Type:</b> ${req.type}</p>
+              <p><b>Amount:</b> ${req.amount}</p>
+              <button class="btn approve" onclick="approveRequest('${key}', '${req.uid}', ${req.amount}, '${req.type}')">Approve</button>
+              <button class="btn reject" onclick="rejectRequest('${key}')">Reject</button>
+            `;
+            list.appendChild(card);
+          }
+        }
+      });
+    }
+
+    function approveRequest(reqId, uid, amount, type) {
+      const userRef = db.ref("users/" + uid);
+      userRef.once("value", snapshot => {
+        const data = snapshot.val();
+        let newCoins = data.coins;
+
+        if (type === "add") {
+          newCoins += amount;
+        } else if (type === "withdraw") {
+          newCoins -= amount;
+        }
+
+        userRef.update({ coins: newCoins });
+        db.ref("requests/" + reqId).update({ status: "approved" });
+        alert("Approved!");
+        loadRequests();
+      });
+    }
+
+    function rejectRequest(reqId) {
+      db.ref("requests/" + reqId).update({ status: "rejected" });
+      alert("Rejected!");
+      loadRequests();
+    }
+  </script>
+</body>
+</html>
