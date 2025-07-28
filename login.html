@@ -1,104 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Jeet365 - Login</title>
+  <meta charset="UTF-8">
+  <title>Jeet365 Login</title>
   <style>
     body {
-      margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background-color: #000;
-      color: white;
+      background-color: #111;
+      color: #fff;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
+      margin: 0;
     }
 
-    .login-container {
-      background-color: #111;
-      padding: 40px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-    }
-
-    .login-container h2 {
-      text-align: center;
+    h2 {
+      color: #facc15;
       margin-bottom: 20px;
-      color: goldenrod;
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 8px;
+      width: 250px;
+      border: none;
+      border-radius: 5px;
     }
 
     input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 5px;
       background-color: #222;
-      color: white;
+      color: #fff;
     }
 
     button {
-      width: 100%;
-      padding: 12px;
-      background-color: goldenrod;
-      color: black;
-      border: none;
-      border-radius: 5px;
+      background-color: #facc15;
+      color: #000;
       font-weight: bold;
       cursor: pointer;
-      transition: 0.3s ease;
     }
 
-    button:hover {
-      background-color: orange;
-    }
-
-    .link {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
-    }
-
-    .link a {
-      color: #f1c40f;
+    a {
+      color: #facc15;
       text-decoration: none;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
-  <div class="login-container">
-    <h2>Login to Jeet365</h2>
-    <input type="email" id="email" placeholder="Email" required />
-    <input type="password" id="password" placeholder="Password" required />
-    <button onclick="loginUser()">Login</button>
-    <div class="link">Don't have an account? <a href="signup.html">Signup</a></div>
-  </div>
+  <h2>Login to Jeet365</h2>
 
-  <!-- Firebase App & Auth CDN -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <input type="email" id="email" placeholder="Enter Email" required>
+  <input type="password" id="password" placeholder="Enter Password" required>
+  <button onclick="loginUser()">Login</button>
 
-  <!-- Your Config -->
+  <a href="signup.html">Don't have an account? Sign up</a>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+
   <script>
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBo47HJZAcS8nCEyntKPAJLeJg_zUTo1nw",
       authDomain: "jeet365-e0749.firebaseapp.com",
-      databaseURL: "https://jeet365-e0749-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "jeet365-e0749",
-      storageBucket: "jeet365-e0749.firebasestorage.app",
+      storageBucket: "jeet365-e0749.appspot.com",
       messagingSenderId: "856388622116",
-      appId: "1:856388622116:web:f2313da855969554e405b1",
-      measurementId: "G-EH0F3Q96F5"
+      appId: "1:856388622116:web:f2313da855969554e405b1"
     };
+
     firebase.initializeApp(firebaseConfig);
   </script>
 
-  <!-- Login Logic -->
   <script>
     function loginUser() {
       const email = document.getElementById("email").value;
@@ -106,8 +83,16 @@
 
       firebase.auth().signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
-          alert("Login Successful!");
-          window.location.href = "dashboard.html";
+          const user = userCredential.user;
+
+          // ✅ Admin email check
+          if (user.email === "deepworkhome100@gmail.com") {
+            alert("Welcome Admin!");
+            window.location.href = "admin.html";
+          } else {
+            alert("Login Successful!");
+            window.location.href = "dashboard.html";
+          }
         })
         .catch((error) => {
           alert("Login Failed: " + error.message);
