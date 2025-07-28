@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Signup - Jeet365</title>
   <style>
     body {
@@ -15,7 +15,6 @@
       justify-content: center;
       height: 100vh;
     }
-
     .signup-box {
       background-color: #111;
       padding: 30px;
@@ -24,12 +23,10 @@
       max-width: 400px;
       box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
     }
-
     h2 {
       text-align: center;
       color: goldenrod;
     }
-
     input {
       width: 100%;
       padding: 12px;
@@ -39,7 +36,6 @@
       background-color: #222;
       color: white;
     }
-
     button {
       width: 100%;
       padding: 14px;
@@ -50,16 +46,13 @@
       color: black;
       cursor: pointer;
     }
-
     button:hover {
       background-color: orange;
     }
-
     p {
       text-align: center;
       margin-top: 15px;
     }
-
     a {
       color: goldenrod;
       text-decoration: none;
@@ -70,8 +63,8 @@
 
   <div class="signup-box">
     <h2>Jeet365 Signup</h2>
-    <input type="email" id="email" placeholder="Enter your email" required>
-    <input type="password" id="password" placeholder="Create a password" required>
+    <input type="email" id="email" placeholder="Enter your email" required />
+    <input type="password" id="password" placeholder="Create a password" required />
     <button onclick="signupUser()">Signup</button>
     <p>Already have an account? <a href="login.html">Login</a></p>
   </div>
@@ -112,17 +105,23 @@
           const user = userCredential.user;
           const userId = user.uid;
 
-          // Insert user data into Realtime Database
+          // Add user info to Realtime Database
           firebase.database().ref("users/" + userId).set({
             email: email,
-            coins: 10 // default signup coins
+            coins: 100, // default welcome coins
+            createdAt: new Date().toISOString()
+          })
+          .then(() => {
+            alert("Signup successful!");
+            window.location.href = "dashboard.html";
+          })
+          .catch((error) => {
+            alert("Database error: " + error.message);
           });
 
-          // Redirect to dashboard
-          window.location.href = "dashboard.html";
         })
         .catch((error) => {
-          alert(error.message);
+          alert("Signup error: " + error.message);
         });
     }
   </script>
