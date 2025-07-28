@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Coins - Jeet365</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      color: gold;
+      text-align: center;
+    }
+    .upi-box {
+      background: #222;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 10px auto;
+      max-width: 400px;
+      box-shadow: 0 0 5px gold;
+    }
+    .upi-box p {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+    .upi-id {
+      font-weight: bold;
+      font-size: 18px;
+      color: #ff0;
+    }
+    form {
+      max-width: 400px;
+      margin: auto;
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px #ff9100;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      background-color: #ff9100;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .note {
+      text-align: center;
+      font-size: 14px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Add Coins</h2>
+
+  <div class="upi-box">
+    <p>📲 Send Payment to this UPI:</p>
+    <div class="upi-id" id="upiText">7724941807@paytm</div>
+    <button onclick="copyUPI()">📋 Copy UPI ID</button>
+  </div>
+
+  <form id="addCoinForm">
+    <input type="text" id="userUpi" placeholder="Enter Your UPI ID" required>
+    <input type="number" id="amount" placeholder="Enter Amount ₹" min="10" required>
+    <button type="button" onclick="payNow()">Pay via UPI</button>
+    <button type="submit">Submit Request</button>
+  </form>
+
+  <p class="note">First send the money via UPI, then submit the request.</p>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    const adminUPI = "deepak95754272@axl";
+
+    function copyUPI() {
+      navigator.clipboard.writeText(adminUPI);
+      alert("UPI ID copied!");
+    }
+
+    function payNow() {
+      const amount = document.getElementById("amount").value.trim();
+      if (!amount || amount < 10) {
+        alert("Minimum ₹10 required to proceed.");
+        return;
+      }
+
+      const url = upi://pay?pa=${adminUPI}&pn=JEET365&cu=INR&am=${amount};
+      window.location.href = url;
+    }
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (!user) return location.href = "login.html";
+
+      document.getElementById("addCoinForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const userUpi = document.getElementById("userUpi").value.trim();
+        const amount = parseInt(document.getElementById("amount").value.trim());
+
+        if (!userUpi || amount < 10) {
+          alert("Please enter your UPI ID and amount properly.");
+          return;
+        }
+
+        firebase.database().ref("requests").push({
+          uid: user.uid,
+          userUpi: userUpi,
+          amount: amount,
+          type: "add",
+          status: "pending",
+          timestamp: Date.now()
+        }).then(() => {
+          alert("Request submitted! Admin will verify and add coins shortly.");
+          document.getElementById("addCoinForm").reset();
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
