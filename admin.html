@@ -57,16 +57,23 @@
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // Admin Email
+    // ✅ Admin Email Only
     const adminEmail = "deepworkhome100@gmail.com";
 
+    // ✅ Check if Logged In + Is Admin
     auth.onAuthStateChanged(user => {
-      if (user && user.email === adminEmail) {
-        document.getElementById("adminPanel").style.display = "block";
-        loadRequests();
+      if (user) {
+        if (user.email === adminEmail) {
+          document.getElementById("adminPanel").style.display = "block";
+          loadRequests();
+        } else {
+          // ❌ Not Admin – Redirect to Dashboard
+          alert("You are not admin!");
+          window.location.href = "dashboard.html";
+        }
       } else {
-        alert("You are not authorized!");
-        window.location.href = "dashboard.html";
+        // ❌ Not Logged In – Redirect to Login
+        window.location.href = "login.html";
       }
     });
 
