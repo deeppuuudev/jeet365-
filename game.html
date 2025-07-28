@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jeet365 - Color Game</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background-color: #111;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+
+    h2 {
+      color: goldenrod;
+      margin-bottom: 10px;
+    }
+
+    .timer {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #0f0;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background-color: #222;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      background-color: goldenrod;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    .logout {
+      margin-top: 20px;
+    }
+
+    .logout button {
+      background-color: red;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>🎮 Color Prediction Game</h2>
+    <div class="timer">Time Left: <span id="timer">59</span> sec</div>
+
+    <select id="color">
+      <option value="">-- Select Color --</option>
+      <option value="Red">🔴 Red (2x)</option>
+      <option value="Green">🟢 Green (2x)</option>
+      <option value="Violet">🟣 Violet (2x)</option>
+    </select>
+
+    <input type="number" id="amount" placeholder="Enter coins (min 10)" min="10" />
+    <button onclick="placeBet()">Place Bet</button>
+
+    <div class="result" id="gameResult">Waiting for result...</div>
+
+    <div class="logout">
+      <button onclick="logoutUser()">Logout</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBo47HJZAcS8nCEyntKPAJLeJg_zUTo1nw",
+      authDomain: "jeet365-e0749.firebaseapp.com",
+      databaseURL: "https://jeet365-e0749-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "jeet365-e0749",
+      storageBucket: "jeet365-e0749.firebasestorage.app",
+      messagingSenderId: "856388622116",
+      appId: "1:856388622116:web:f2313da855969554e405b1",
+      measurementId: "G-EH0F3Q96F5"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <!-- Game Logic -->
+  <script>
+    let userId = null;
+    let timer = 59;
+    let interval;
+    let currentBet = null;
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        userId = user.uid;
+        startGameLoop();
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+
+    function placeBet() {
+      const selectedColor = document.getElementById("color").value;
+      const betAmount = parseInt(document.getElementById("amount").value);
+
+      if (!selectedColor || isNaN(betAmount) || betAmount < 10) {
+        alert("Select a color and minimum 10 coins.");
+        return;
+      }
+
+      // Get current coin balance
+      firebase.database().ref("users/" + userId + "/coins").once("value")
+        .then(snapshot => {
+          const currentCoins = snapshot.val() || 0;
+
+          if (currentCoins < betAmount) {
+            alert("Not enough coins.");
+            return;
+          }
+
+          // Deduct coins now
+          firebase.database().ref("users/" + userId).update({
+            coins: currentCoins - betAmount
+          });
+
+          // Store the current bet
+          currentBet = {
+            color: selectedColor,
+            amount: betAmount
+          };
+
+          document.getElementById("gameResult").innerText = "Bet placed on " + selectedColor + " with " + betAmount + " coins.";
+        });
+    }
+
+    function startGameLoop() {
+      interval = setInterval(() => {
+        document.getElementById("timer").innerText = timer;
+        if (timer === 0) {
+          showResult();
+          timer = 59;
+        } else {
+          timer--;
+        }
+      }, 1000);
+    }
+
+    function showResult() {
+      const colors = ["Red", "Green", "Violet"];
+      const win = Math.random() < 0.2; // 20% chance to win
+      const winningColor = win && currentBet ? currentBet.color : colors[Math.floor(Math.random() * colors.length)];
+
+      document.getElementById("gameResult").innerText = "Winning Color: " + winningColor;
+
+      if (currentBet && currentBet.color === winningColor) {
+        const reward = currentBet.amount * 2;
+
+        // Add winning coins
+        firebase.database().ref("users/" + userId + "/coins").once("value")
+          .then(snapshot => {
+            const currentCoins = snapshot.val() || 0;
+            firebase.database().ref("users/" + userId).update({
+              coins: currentCoins + reward
+            });
+          });
+
+        document.getElementById("gameResult").innerText += ` ✅ You Won +${reward} coins!`;
+      } else if (currentBet) {
+        document.getElementById("gameResult").innerText += " ❌ You Lost.";
+      }
+
+      currentBet = null;
+    }
+
+    function logoutUser() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
+  </script>
+
+</body>
+</html>
