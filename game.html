@@ -1,152 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Jeet365 - Color Game</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Color Prediction Game - Jeet365</title>
   <style>
     body {
       margin: 0;
-      background-color: #000;
-      color: white;
       font-family: 'Segoe UI', sans-serif;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 480px;
-      margin: auto;
-      background-color: #111;
-      padding: 30px 20px;
-      border-radius: 15px;
+      background-color: #ffffff;
+      color: #000;
       text-align: center;
-      box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-    }
+    }header {
+  background-color: #000;
+  color: goldenrod;
+  padding: 15px 0;
+  font-size: 24px;
+  font-weight: bold;
+}
 
-    h2 {
-      color: goldenrod;
-      margin-bottom: 10px;
-      font-size: 26px;
-    }
+.game-box {
+  padding: 30px 20px;
+}
 
-    .timer {
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 20px;
-      color: #00ff00;
-      background-color: #222;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: inset 0 0 5px #0f0;
-    }
+.timer {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
 
-    select, input {
-      width: 100%;
-      padding: 12px;
-      margin-top: 12px;
-      background-color: #222;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-size: 16px;
-    }
+.color-options {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
 
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 15px;
-      background: linear-gradient(90deg, goldenrod, orange);
-      color: black;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+.color-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid #ccc;
+  transition: transform 0.2s;
+}
 
-    button:hover {
-      opacity: 0.9;
-    }
+.color-btn:hover {
+  transform: scale(1.1);
+}
 
-    .logout button {
-      background-color: #ff4444;
-      color: white;
-    }
+.red { background-color: red; }
+.green { background-color: green; }
+.blue { background-color: blue; }
+.yellow { background-color: goldenrod; }
 
-    /* Popup styles */
-    .popup {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      background: rgba(0, 0, 0, 0.8);
-      z-index: 999;
-    }
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 25px 40px;
+  border-radius: 10px;
+  font-size: 20px;
+  display: none;
+  z-index: 1000;
+}
 
-    .popup-content {
-      background-color: #111;
-      padding: 30px;
-      border-radius: 10px;
-      text-align: center;
-      color: white;
-      box-shadow: 0 0 20px goldenrod;
-      max-width: 300px;
-    }
+.bet-section {
+  margin-top: 20px;
+}
 
-    .popup-content h3 {
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
+input[type='number'] {
+  padding: 8px;
+  width: 120px;
+  border-radius: 5px;
+  border: 1px solid #aaa;
+}
 
-    .popup-content p {
-      font-size: 18px;
-    }
+button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: goldenrod;
+  border: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
-    .popup-content button {
-      margin-top: 20px;
-      background-color: goldenrod;
-    }
+button:hover {
+  background-color: orange;
+}
+
   </style>
 </head>
 <body>
+  <header>🎯 Jeet365 Color Game</header>  <div class="game-box">
+    <div class="timer">Next round in <span id="timer">30</span> sec</div><div class="color-options">
+  <div class="color-btn red" onclick="selectColor('red')"></div>
+  <div class="color-btn green" onclick="selectColor('green')"></div>
+  <div class="color-btn blue" onclick="selectColor('blue')"></div>
+  <div class="color-btn yellow" onclick="selectColor('yellow')"></div>
+</div>
 
-  <div class="container">
-    <h2>🎮 Jeet365 Color Game</h2>
-    <div class="timer">⏳ Time Left: <span id="timer">59</span>s</div>
+<div class="bet-section">
+  <input type="number" id="betAmount" placeholder="Bet amount" min="10" />
+  <br />
+  <button onclick="placeBet()">Place Bet</button>
+</div>
 
-    <select id="color">
-      <option value="">🎨 Select Color</option>
-      <option value="Red">🔴 Red (2x)</option>
-      <option value="Green">🟢 Green (2x)</option>
-      <option value="Violet">🟣 Violet (2x)</option>
-    </select>
-
-    <input type="number" id="amount" placeholder="Enter coins (min 10)" min="10" />
-    <button onclick="placeBet()">Place Bet</button>
-
-    <div class="logout">
-      <button onclick="logoutUser()">Logout</button>
-    </div>
-  </div>
-
-  <!-- Result Popup -->
-  <div class="popup" id="popup">
-    <div class="popup-content">
-      <h3 id="popupTitle">Result</h3>
-      <p id="popupMessage">Details here</p>
-      <button onclick="closePopup()">OK</button>
-    </div>
-  </div>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
-  <!-- Firebase Config -->
-  <script>
+  </div>  <div class="popup" id="popup"></div>  <!-- Firebase SDKs -->  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>  <!-- Firebase Config -->  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBo47HJZAcS8nCEyntKPAJLeJg_zUTo1nw",
       authDomain: "jeet365-e0749.firebaseapp.com",
@@ -157,107 +120,62 @@
       appId: "1:856388622116:web:f2313da855969554e405b1"
     };
     firebase.initializeApp(firebaseConfig);
-  </script>
-
-  <!-- Game Logic -->
-  <script>
-    let userId = null;
-    let timer = 59;
+    const auth = firebase.auth();
+    const db = firebase.database();
+  </script>  <!-- Game Logic -->  <script>
+    let selectedColor = null;
+    let timer = 30;
     let interval;
-    let currentBet = null;
 
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        userId = user.uid;
-        startGameLoop();
-      } else {
-        window.location.href = "login.html";
-      }
-    });
-
-    function placeBet() {
-      const selectedColor = document.getElementById("color").value;
-      const betAmount = parseInt(document.getElementById("amount").value);
-
-      if (!selectedColor || isNaN(betAmount) || betAmount < 10) {
-        alert("Select a color and minimum 10 coins.");
-        return;
-      }
-
-      firebase.database().ref("users/" + userId + "/coins").once("value")
-        .then(snapshot => {
-          const currentCoins = snapshot.val() || 0;
-
-          if (currentCoins < betAmount) {
-            alert("Not enough coins.");
-            return;
-          }
-
-          firebase.database().ref("users/" + userId).update({
-            coins: currentCoins - betAmount
-          });
-
-          currentBet = {
-            color: selectedColor,
-            amount: betAmount
-          };
-
-          alert(✅ Bet placed on ${selectedColor} with ${betAmount} coins.);
-        });
-    }
-
-    function startGameLoop() {
+    function startTimer() {
       interval = setInterval(() => {
-        document.getElementById("timer").innerText = timer;
-        if (timer === 0) {
-          showResult();
-          timer = 59;
-        } else {
-          timer--;
+        timer--;
+        document.getElementById('timer').innerText = timer;
+        if (timer <= 0) {
+          clearInterval(interval);
+          checkResult();
         }
       }, 1000);
     }
 
-    function showResult() {
-      const colors = ["Red", "Green", "Violet"];
-      const win = Math.random() < 0.2; // 20% win chance
-      const winningColor = win && currentBet ? currentBet.color : colors[Math.floor(Math.random() * colors.length)];
+    function selectColor(color) {
+      selectedColor = color;
+      alert("Selected: " + color);
+    }
 
-      if (currentBet && currentBet.color === winningColor) {
-        const reward = currentBet.amount * 2;
+    function placeBet() {
+      const betAmount = parseInt(document.getElementById("betAmount").value);
+      if (!selectedColor) return alert("Please select a color.");
+      if (!betAmount || betAmount < 10) return alert("Minimum bet is 10 coins.");
 
-        firebase.database().ref("users/" + userId + "/coins").once("value")
-          .then(snapshot => {
-            const currentCoins = snapshot.val() || 0;
-            firebase.database().ref("users/" + userId).update({
-              coins: currentCoins + reward
-            });
-          });
+      // Simulate coin deduction (you can connect with actual user data later)
+      localStorage.setItem("userBet", JSON.stringify({ color: selectedColor, amount: betAmount }));
+      alert("Bet placed on " + selectedColor);
+    }
 
-        showPopup("🎉 You Won!", Winning Color: ${winningColor}<br>+${reward} coins added.);
-      } else if (currentBet) {
-        showPopup("😢 You Lost", Winning Color: ${winningColor}<br>Better luck next time.);
+    function checkResult() {
+      const resultColors = ["red", "green", "blue", "yellow"];
+      const result = resultColors[Math.floor(Math.random() * resultColors.length)];
+      const userBet = JSON.parse(localStorage.getItem("userBet"));
+
+      if (userBet && userBet.color === result) {
+        showPopup("You Win! 🎉");
+      } else {
+        showPopup("You Lost! ❌");
       }
-
-      currentBet = null;
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     }
 
-    function showPopup(title, message) {
-      document.getElementById("popupTitle").innerHTML = title;
-      document.getElementById("popupMessage").innerHTML = message;
-      document.getElementById("popup").style.display = "flex";
+    function showPopup(message) {
+      const popup = document.getElementById("popup");
+      popup.innerText = message;
+      popup.style.display = "block";
     }
 
-    function closePopup() {
-      document.getElementById("popup").style.display = "none";
-    }
-
-    function logoutUser() {
-      firebase.auth().signOut().then(() => {
-        window.location.href = "login.html";
-      });
-    }
-  </script>
-
-</body>
+    window.onload = () => {
+      startTimer();
+    };
+  </script></body>
 </html>
