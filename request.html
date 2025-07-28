@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jeet365 - Request Coins</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      color: gold;
+      text-align: center;
+    }
+    form {
+      max-width: 400px;
+      margin: auto;
+      background: #222;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #ff9100;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: none;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      background: gold;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Request Coins</h2>
+  <form id="requestForm">
+    <label for="type">Request Type</label>
+    <select id="type" required>
+      <option value="add">Add Coins</option>
+      <option value="withdraw">Withdraw Coins</option>
+    </select>
+
+    <label for="amount">Amount</label>
+    <input type="number" id="amount" required min="1" placeholder="Enter amount">
+
+    <label for="upi">Your UPI ID (for Withdrawals)</label>
+    <input type="text" id="upi" placeholder="user@upi (only for withdrawal)">
+
+    <button type="submit">Submit Request</button>
+  </form>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script>
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (!user) {
+        window.location.href = "login.html";
+      }
+
+      const requestForm = document.getElementById("requestForm");
+
+      requestForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const type = document.getElementById("type").value;
+        const amount = parseInt(document.getElementById("amount").value);
+        const upi = document.getElementById("upi").value;
+
+        if (type === "withdraw" && upi.trim() === "") {
+          alert("Please enter your UPI ID for withdrawal.");
+          return;
+        }
+
+        const requestData = {
+          uid: user.uid,
+          email: user.email,
+          type: type,
+          amount: amount,
+          upi: upi || "N/A",
+          status: "pending",
+          timestamp: new Date().toISOString()
+        };
+
+        firebase.database().ref("requests").push(requestData)
+          .then(() => {
+            alert("Request submitted successfully!");
+            requestForm.reset();
+          })
+          .catch((error) => {
+            console.error("Error submitting request:", error);
+            alert("Failed to submit request.");
+          });
+      });
+    });
+  </script>
+</body>
+</html>
